@@ -4,11 +4,27 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useTransactionStore } from '../store/transactionStore';
 import { Category } from '../db/schema';
+import { motion } from 'framer-motion';
 
 interface AddExpenseProps {
   onCancel: () => void;
   onSuccess: () => void;
 }
+
+const formVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const fieldVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: { y: 0, opacity: 1 }
+};
 
 const AddExpense: React.FC<AddExpenseProps> = ({ onCancel, onSuccess }) => {
   const { addTransaction } = useTransactionStore();
@@ -38,41 +54,53 @@ const AddExpense: React.FC<AddExpenseProps> = ({ onCancel, onSuccess }) => {
     <Layout>
       <div className="max-w-md mx-auto py-12 px-4">
         <Card title="Add Manual Expense" decoration="circle" decorationColor="red">
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <input 
-              type="number"
-              placeholder="Amount (₹)"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full p-3 border-2 border-bauhaus-black"
-              required
-            />
-            <input 
-              type="text"
-              placeholder="Payee (e.g. Grocery Store)"
-              value={payee}
-              onChange={(e) => setPayee(e.target.value)}
-              className="w-full p-3 border-2 border-bauhaus-black"
-              required
-            />
-            <select 
-              value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
-              className="w-full p-3 border-2 border-bauhaus-black"
-            >
-              <option value="food">Food</option>
-              <option value="transport">Transport</option>
-              <option value="groceries">Groceries</option>
-              <option value="subscriptions">Subscriptions</option>
-              <option value="utilities">Utilities</option>
-              <option value="shopping">Shopping</option>
-              <option value="other">Other</option>
-            </select>
-            <div className="flex gap-4 pt-4">
+          <motion.form 
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            onSubmit={handleSubmit} 
+            className="space-y-4 mt-4"
+          >
+            <motion.div variants={fieldVariants}>
+              <input 
+                type="number"
+                placeholder="Amount (₹)"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full p-3 border-2 border-bauhaus-black focus:ring-2 focus:ring-bauhaus-red outline-none"
+                required
+              />
+            </motion.div>
+            <motion.div variants={fieldVariants}>
+              <input 
+                type="text"
+                placeholder="Payee (e.g. Grocery Store)"
+                value={payee}
+                onChange={(e) => setPayee(e.target.value)}
+                className="w-full p-3 border-2 border-bauhaus-black focus:ring-2 focus:ring-bauhaus-red outline-none"
+                required
+              />
+            </motion.div>
+            <motion.div variants={fieldVariants}>
+              <select 
+                value={category}
+                onChange={(e) => setCategory(e.target.value as Category)}
+                className="w-full p-3 border-2 border-bauhaus-black focus:ring-2 focus:ring-bauhaus-red outline-none"
+              >
+                <option value="food">Food</option>
+                <option value="transport">Transport</option>
+                <option value="groceries">Groceries</option>
+                <option value="subscriptions">Subscriptions</option>
+                <option value="utilities">Utilities</option>
+                <option value="shopping">Shopping</option>
+                <option value="other">Other</option>
+              </select>
+            </motion.div>
+            <motion.div variants={fieldVariants} className="flex gap-4 pt-4">
               <Button type="button" variant="outline" onClick={onCancel} className="flex-1">Cancel</Button>
               <Button type="submit" variant="primary" className="flex-1">Log Expense</Button>
-            </div>
-          </form>
+            </motion.div>
+          </motion.form>
         </Card>
       </div>
     </Layout>

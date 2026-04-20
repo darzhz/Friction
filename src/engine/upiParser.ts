@@ -37,7 +37,20 @@ export function parseUPILink(raw: string): UPIPayload | null {
     };
 
     const pa = getParam('pa');
-    if (!pa) return null;
+    
+    // Handle generic upi://pay with no params
+    if (!pa) {
+      if (raw.toLowerCase().startsWith('upi://pay')) {
+        return {
+          pa: '',
+          pn: 'Manual Entry',
+          am: 0,
+          cu: 'INR',
+          raw: 'upi://pay'
+        };
+      }
+      return null;
+    }
 
     const amStr = getParam('am');
     const am = amStr ? parseFloat(amStr) : 0;

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserQRCodeReader } from '@zxing/library';
 import { Button } from './Button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface QRScannerProps {
   onScanSuccess: (decodedText: string) => void;
@@ -79,27 +80,50 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailu
         className={`w-full h-full object-cover ${!isScanning ? 'hidden' : ''}`}
       />
       
-      {!isScanning && (
-        <div className="p-8 text-center space-y-4 z-10">
-          {error ? (
-            <p className="text-bauhaus-red font-black uppercase tracking-tighter text-sm mb-4">{error}</p>
-          ) : (
-            <p className="text-white font-black uppercase tracking-widest text-xs opacity-60 italic">Lens ready</p>
-          )}
-          <Button variant="yellow" onClick={startScanner} className="w-48 h-16 text-xl">
-            {error ? 'Retry' : 'Start Scan'}
-          </Button>
-        </div>
-      )}
+      <AnimatePresence>
+        {!isScanning && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="p-8 text-center space-y-4 z-10"
+          >
+            {error ? (
+              <p className="text-bauhaus-red font-black uppercase tracking-tighter text-sm mb-4">{error}</p>
+            ) : (
+              <p className="text-white font-black uppercase tracking-widest text-xs opacity-60 italic">Lens ready</p>
+            )}
+            <Button variant="yellow" onClick={startScanner} className="w-48 h-16 text-xl">
+              {error ? 'Retry' : 'Start Scan'}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {isScanning && (
-        <>
-          {/* Custom Bauhaus Overlay */}
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="w-[70%] h-[70%] border-4 border-bauhaus-red opacity-40 border-dashed animate-pulse" />
-            <div className="absolute top-4 left-4 text-[10px] font-black uppercase text-white tracking-[0.2em] bg-bauhaus-red px-2 py-1">
-              Live Feed
+      <AnimatePresence>
+        {isScanning && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          >
+            {/* Custom Bauhaus Overlay */}
+            <div className="w-[70%] h-[70%] border-4 border-bauhaus-red/40 border-dashed relative overflow-hidden">
+              <motion.div 
+                animate={{ y: ['0%', '100%'] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                className="absolute top-0 left-0 w-full h-1 bg-bauhaus-red shadow-[0_0_15px_rgba(255,0,0,0.8)]"
+              />
             </div>
+            
+            <motion.div 
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="absolute top-4 left-4 text-[10px] font-black uppercase text-white tracking-[0.2em] bg-bauhaus-red px-2 py-1 shadow-bauhaus-sm"
+            >
+              Live Feed
+            </motion.div>
             
             <button 
               onClick={stopScanner}
@@ -107,9 +131,9 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailu
             >
               Cancel
             </button>
-          </div>
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

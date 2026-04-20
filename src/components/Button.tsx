@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'yellow' | 'outline' | 'ghost';
@@ -25,12 +26,18 @@ export const Button: React.FC<ButtonProps> = ({
     pill: 'rounded-full',
   };
 
+  // Omit conflicting props from standard button attributes that framer-motion overrides
+  const { onAnimationStart, onDrag, onDragEnd, onDragStart, ...motionSafeProps } = props as any;
+
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98, y: 2 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 10 } as any}
       className={`bauhaus-button ${variants[variant]} ${shapes[shape]} ${className}`}
-      {...props}
+      {...motionSafeProps}
     >
       {children}
-    </button>
+    </motion.button>
   );
 };

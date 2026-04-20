@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface CardProps {
   title?: string;
@@ -24,17 +25,34 @@ export const Card: React.FC<CardProps> = ({
   const Decoration = () => {
     switch (decoration) {
       case 'square':
-        return <div className={`w-4 h-4 rounded-none ${colors[decorationColor]}`} />;
+        return (
+          <motion.div 
+            initial={{ rotate: -45, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className={`w-4 h-4 rounded-none ${colors[decorationColor]}`} 
+          />
+        );
       case 'triangle':
         return (
-          <div 
+          <motion.div 
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', damping: 12, delay: 0.2 }}
             className={`w-4 h-4 ${colors[decorationColor]}`} 
             style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} 
           />
         );
       case 'circle':
       default:
-        return <div className={`w-4 h-4 rounded-full ${colors[decorationColor]}`} />;
+        return (
+          <motion.div 
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', damping: 12, delay: 0.2 }}
+            className={`w-4 h-4 rounded-full ${colors[decorationColor]}`} 
+          />
+        );
     }
   };
 

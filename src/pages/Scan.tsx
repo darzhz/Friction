@@ -79,7 +79,7 @@ const Scan: React.FC<ScanProps> = ({ onScanSuccess }) => {
               <Button 
                 variant="outline" 
                 className="w-full text-xs"
-                onClick={() => onScanSuccess('pa=merchant@okaxis&pn=Manual%20Entry&am=0')}
+                onClick={() => onScanSuccess('upi://pay')}
               >
                 Quick Bypass
               </Button>

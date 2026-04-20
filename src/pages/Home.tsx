@@ -6,11 +6,33 @@ import { Scan, Plus, ArrowRight } from 'lucide-react';
 import { useBudgetStore } from '../store/budgetStore';
 import { useTransactionStore } from '../store/transactionStore';
 import { computeWeeklyState } from '../engine/budgetEngine';
+import { motion, Variants } from 'framer-motion';
+import { BauhausMarquee } from '../components/Marquee';
 
 interface HomeProps {
   onScanRequest: () => void;
   onAddExpense: () => void;
 }
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: 'spring', damping: 25, stiffness: 500 } as any
+  }
+};
 
 const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
   const { config, loadConfig } = useBudgetStore();
@@ -32,9 +54,15 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto py-12 px-4 space-y-12">
+      <BauhausMarquee />
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-7xl mx-auto py-12 px-4 space-y-12"
+      >
         {/* Hero Section / Budget Widget */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <motion.section variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="space-y-6">
             <h2 className="text-4xl sm:text-6xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.9]">
               Discipline <br />
@@ -70,9 +98,11 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
 
                 <div className="space-y-2">
                   <div className="h-8 w-full border-2 border-white rounded-none flex overflow-hidden">
-                    <div 
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (spentThisWeek / (cascade.weeklyBudget || 1)) * 100)}%` }}
+                      transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
                       className="bg-bauhaus-yellow h-full border-r-2 border-white" 
-                      style={{ width: `${Math.min(100, (spentThisWeek / (cascade.weeklyBudget || 1)) * 100)}%` }} 
                     />
                   </div>
                   <div className="flex justify-between font-bold uppercase text-xs tracking-widest text-white/80">
@@ -106,10 +136,10 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
               </div>
             )}
           </Card>
-        </section>
+        </motion.section>
 
         {/* Info Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card title="Fixed Expenses" decoration="square" decorationColor="red">
             <p className="text-sm text-gray-500 mb-4">Recurring costs accounted for before your weekly budget.</p>
             <p className="text-3xl font-black">₹{cascade.fixedTotal}</p>
@@ -127,10 +157,10 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
             <p className="text-3xl font-black">₹{cascade.spendable}</p>
             <p className="text-xs uppercase font-bold tracking-widest mt-2 text-bauhaus-yellow">Monthly pool</p>
           </Card>
-        </section>
+        </motion.section>
 
         {/* Recent Transactions */}
-        <section className="space-y-6">
+        <motion.section variants={itemVariants} className="space-y-6">
           <div className="flex justify-between items-end border-b-4 border-bauhaus-black pb-2">
             <h3 className="text-4xl font-black uppercase tracking-tighter">Recent Spends</h3>
             <Button variant="ghost" className="text-xs">View All <ArrowRight className="ml-1 w-4 h-4" /></Button>
@@ -142,8 +172,14 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
                 No transactions yet. Start by scanning a QR.
               </div>
             ) : (
-              transactions.slice(0, 5).map(tx => (
-                <div key={tx.id} className="flex justify-between items-center p-4 bg-white border-2 border-bauhaus-black shadow-bauhaus-sm">
+              transactions.slice(0, 5).map((tx, idx) => (
+                <motion.div 
+                  key={tx.id} 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + (idx * 0.1) }}
+                  className="flex justify-between items-center p-4 bg-white border-2 border-bauhaus-black shadow-bauhaus-sm"
+                >
                   <div>
                     <p className="font-black uppercase tracking-tight">{tx.payee}</p>
                     <p className="text-xs text-gray-500 uppercase tracking-widest">{new Date(tx.timestamp).toLocaleDateString()} • {tx.category}</p>
@@ -154,12 +190,12 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
                       {tx.confirmed ? '✓ Confirmed' : '⚠ Pending'}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
-        </section>
-      </div>
+        </motion.section>
+      </motion.div>
     </Layout>
   );
 };

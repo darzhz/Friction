@@ -1,5 +1,6 @@
 import React from 'react';
 import { Circle, Square as SquareIcon, Triangle, Home, Scan as ScanIcon, Settings, History } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,7 +13,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-20 md:pb-0 overflow-x-hidden">
       <header className="border-b-4 border-bauhaus-black p-4 bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
@@ -33,9 +34,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      <main className="flex-1 bg-bauhaus-white">
+      <motion.main 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        className="flex-1 bg-bauhaus-white"
+      >
         {children}
-      </main>
+      </motion.main>
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-4 border-bauhaus-black z-50 h-20 flex items-center justify-around px-4">
@@ -44,9 +50,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <span className="text-[10px] font-bold uppercase tracking-widest">Home</span>
         </button>
         <button onClick={() => navigate('/scan')} className="flex flex-col items-center gap-1 group">
-          <div className="bg-bauhaus-red p-3 -mt-10 border-4 border-bauhaus-black shadow-bauhaus-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+          <motion.div 
+            whileTap={{ scale: 0.9, y: 2 }}
+            className="bg-bauhaus-red p-3 -mt-10 border-4 border-bauhaus-black shadow-bauhaus-sm active:shadow-none transition-all"
+          >
             <ScanIcon className="w-6 h-6 text-white" />
-          </div>
+          </motion.div>
           <span className="text-[10px] font-bold uppercase tracking-widest mt-1">Scan</span>
         </button>
         <button onClick={() => navigate('/settings')} className="flex flex-col items-center gap-1 group">
@@ -73,3 +82,4 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 };
+
