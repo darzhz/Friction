@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Settings from './pages/Settings';
 import Scan from './pages/Scan';
 import PaymentGate from './pages/PaymentGate';
+import AddExpense from './pages/AddExpense';
 import { parseUPILink, UPIPayload } from './engine/upiParser';
 import { useTransactionStore } from './store/transactionStore';
 import { Layout } from './components/Layout';
@@ -95,6 +96,8 @@ function App() {
     switch (path) {
       case '/settings':
         return <Settings />;
+      case '/add-expense':
+        return <AddExpense onCancel={() => navigate('/')} onSuccess={() => navigate('/')} />;
       case '/scan':
         return <Scan onScanSuccess={(raw) => {
           console.log("Raw scan result:", raw);
@@ -108,7 +111,7 @@ function App() {
         }} />;
       case '/':
       default:
-        return <Home onScanRequest={() => navigate('/scan')} />;
+        return <Home onScanRequest={() => navigate('/scan')} onAddExpense={() => navigate('/add-expense')} />;
     }
   };
 

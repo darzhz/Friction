@@ -9,9 +9,10 @@ import { computeWeeklyState } from '../engine/budgetEngine';
 
 interface HomeProps {
   onScanRequest: () => void;
+  onAddExpense: () => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onScanRequest }) => {
+const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
   const { config, loadConfig } = useBudgetStore();
   const { transactions, loadRecent } = useTransactionStore();
 
@@ -41,10 +42,14 @@ const Home: React.FC<HomeProps> = ({ onScanRequest }) => {
               Awareness
             </h2>
             <div className="flex gap-4">
-              <Button onClick={onScanRequest} className="h-16 px-8 text-xl">
+              <Button onClick={onScanRequest} className="h-16 px-4 lg:px-8 text-sm lg:text-xl">
                 <Scan className="mr-2" /> Scan to Pay
               </Button>
-              <Button variant="outline" className="h-16 px-8 text-xl">
+              <Button 
+                variant="outline" 
+                className="h-16 px-4 text-sm lg:px-8 lg:text-xl"
+                onClick={onAddExpense}
+              >
                 <Plus className="mr-2" /> Add Expense
               </Button>
             </div>

@@ -53,11 +53,20 @@ const Settings: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div className="space-y-2">
                 <label className="block text-xs font-bold uppercase tracking-widest">Monthly Income (₹)</label>
-                <input 
-                  type="number" 
-                  value={profile.monthlyIncome}
-                  onChange={(e) => setProfile({ ...profile, monthlyIncome: Number(e.target.value) })}
-                  className="w-full p-3 border-2 border-bauhaus-black rounded-none focus:outline-none focus:ring-2 focus:ring-bauhaus-blue"
+               <input 
+                type="number" 
+                placeholder="₹25000"
+                // If the value is 0, show an empty string so the user doesn't see a leading zero
+                value={profile.monthlyIncome === 0 ? '' : profile.monthlyIncome}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfile({ 
+                    ...profile, 
+                    // If the user clears the input, set state back to 0
+                    monthlyIncome: val === '' ? 0 : Number(val) 
+                  });
+                }}            
+                className="w-full p-3 border-2 border-bauhaus-black rounded-none focus:outline-none focus:ring-2 focus:ring-bauhaus-blue"
                 />
               </div>
               <div className="space-y-2">
@@ -89,12 +98,20 @@ const Settings: React.FC = () => {
                 <input 
                   type="number"
                   placeholder="Target Amount"
-                  value={profile.savingsGoal.targetAmount}
-                  onChange={(e) => setProfile({ 
-                    ...profile, 
-                    savingsGoal: { ...profile.savingsGoal, targetAmount: Number(e.target.value) } 
-                  })}
-                  className="w-full p-2 border-2 border-bauhaus-black text-sm"
+                  // If the value is 0, show an empty string so the placeholder can be seen
+                  value={profile.savingsGoal.targetAmount === 0 ? '' : profile.savingsGoal.targetAmount}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setProfile({ 
+                      ...profile, 
+                      savingsGoal: { 
+                        ...profile.savingsGoal, 
+                        // Reset to 0 when empty to satisfy the TypeScript number type
+                        targetAmount: val === '' ? 0 : Number(val) 
+                      } 
+                    });
+                  }}
+                  className="w-full p-2 border-2 border-bauhaus-black text-sm focus:outline-none focus:ring-2 focus:ring-bauhaus-blue"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -127,10 +144,17 @@ const Settings: React.FC = () => {
                   />
                   <input 
                     type="number"
-                    className="w-24 p-1 border-b-2 border-bauhaus-black bg-transparent text-sm"
-                    value={expense.amount}
+                    className="w-24 p-1 border-b-2 border-bauhaus-black bg-transparent text-sm focus:outline-none"
+                    placeholder='₹1000'
+                    // Show empty string instead of 0 for a better editing experience
+                    value={expense.amount === 0 ? '' : expense.amount}
                     onChange={(e) => {
-                      const updated = profile.fixedExpenses.map(fe => fe.id === expense.id ? { ...fe, amount: Number(e.target.value) } : fe);
+                      const val = e.target.value;
+                      const updated = profile.fixedExpenses.map(fe => 
+                        fe.id === expense.id 
+                          ? { ...fe, amount: val === '' ? 0 : Number(val) } 
+                          : fe
+                      );
                       setProfile({ ...profile, fixedExpenses: updated });
                     }}
                   />

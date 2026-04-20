@@ -114,9 +114,15 @@ const PaymentGate: React.FC<PaymentGateProps> = ({ payload, onCancel, onSuccess 
               <span className="text-4xl font-black">₹</span>
               <input 
                 type="number"
-                value={localAmount}
-                onChange={(e) => setLocalAmount(Number(e.target.value))}
-                className="text-6xl font-black tracking-tighter bg-transparent border-none w-48 text-center focus:outline-none"
+                // Keep the display empty if the value is 0
+                value={localAmount === 0 ? '' : localAmount}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  // Set to 0 if empty to maintain the number type, otherwise convert to Number
+                  setLocalAmount(val === '' ? 0 : Number(val));
+                }}
+                className="text-6xl font-black tracking-tighter bg-transparent border-none w-full text-center focus:outline-none"
+                placeholder="0"
               />
             </div>
 
