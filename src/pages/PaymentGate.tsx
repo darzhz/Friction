@@ -90,6 +90,7 @@ const PaymentGate: React.FC<PaymentGateProps> = ({ payload, onCancel, onSuccess 
       pn: localPn || 'Manual Entry'
     };
     const link = buildRedirectLink(updatedPayload, config.preferredUPI);
+    console.log("Redirecting to final UPI link:", link);
     performRedirect(link);
     onSuccess();
   };

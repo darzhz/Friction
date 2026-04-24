@@ -45,9 +45,17 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
 
   // Derived state
   const cascade = config.profile.computed;
-  // Calculate spent this week (simplified for now)
+  
+  // Calculate spent this week and today
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
   const spentThisWeek = transactions
     .filter(t => t.confirmed) // In a real app, filter by this week's ID
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const spentToday = transactions
+    .filter(t => t.confirmed && t.timestamp >= startOfToday.getTime())
     .reduce((sum, t) => sum + t.amount, 0);
 
   const weeklyState = computeWeeklyState(cascade, spentThisWeek);
@@ -96,18 +104,37 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
                   <p className="text-6xl font-black tracking-tighter">₹{weeklyState.remaining}</p>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="h-8 w-full border-2 border-white rounded-none flex overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(100, (spentThisWeek / (cascade.weeklyBudget || 1)) * 100)}%` }}
-                      transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-                      className="bg-bauhaus-yellow h-full border-r-2 border-white" 
-                    />
+                <div className="space-y-4">
+                  {/* Daily Progress */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between font-bold uppercase text-[10px] tracking-widest text-white/60">
+                      <span>Today's Pace</span>
+                      <span>₹{spentToday} / ₹{cascade.dailyBudget}</span>
+                    </div>
+                    <div className="h-2 w-full border border-white/30 rounded-none flex overflow-hidden bg-white/5">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, (spentToday / (cascade.dailyBudget || 1)) * 100)}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className={`${spentToday > cascade.dailyBudget ? 'bg-bauhaus-red' : 'bg-bauhaus-white'} h-full`} 
+                      />
+                    </div>
                   </div>
-                  <div className="flex justify-between font-bold uppercase text-xs tracking-widest text-white/80">
-                    <span>Spent: ₹{spentThisWeek}</span>
-                    <span>Limit: ₹{cascade.weeklyBudget}</span>
+
+                  {/* Weekly Progress */}
+                  <div className="space-y-2">
+                    <div className="h-8 w-full border-2 border-white rounded-none flex overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, (spentThisWeek / (cascade.weeklyBudget || 1)) * 100)}%` }}
+                        transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+                        className="bg-bauhaus-yellow h-full border-r-2 border-white" 
+                      />
+                    </div>
+                    <div className="flex justify-between font-bold uppercase text-xs tracking-widest text-white/80">
+                      <span>Weekly Spent: ₹{spentThisWeek}</span>
+                      <span>Limit: ₹{cascade.weeklyBudget}</span>
+                    </div>
                   </div>
                 </div>
 

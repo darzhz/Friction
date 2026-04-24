@@ -17,30 +17,30 @@ export function buildRedirectLink(
   payload: UPIPayload,
   preferredApp: UPIApp = 'default'
 ): string {
-  // Use the standard upi:// scheme for default
-  if (preferredApp === 'default') {
-    // If original raw was already a full upi link, use it, else build one
-    if (payload.raw.startsWith('upi://')) return payload.raw;
-    
-    // Construct search params from payload
-    const params = new URLSearchParams();
-    params.set('pa', payload.pa);
-    params.set('pn', payload.pn);
-    if (payload.am > 0) params.set('am', payload.am.toString());
-    params.set('cu', payload.cu);
-    if (payload.tn) params.set('tn', payload.tn);
-    if (payload.mc) params.set('mc', payload.mc);
-    
-    return `upi://pay?${params.toString()}`;
+  const scheme = PACKAGE_MAP[preferredApp] || PACKAGE_MAP.default;
+  
+  // Extract existing params from raw if it's a UPI URL or contains query params
+  let params = new URLSearchParams();
+  if (payload.raw.includes('?')) {
+    params = new URLSearchParams(payload.raw.split('?')[1]);
+  } else if (payload.raw.includes('=') && !payload.raw.startsWith('upi:')) {
+    // Handle case where raw is just a query string
+    params = new URLSearchParams(payload.raw);
   }
 
-  // For specific apps, swap the scheme
-  const scheme = PACKAGE_MAP[preferredApp];
-  const params = new URLSearchParams();
-  params.set('pa', payload.pa);
-  params.set('pn', payload.pn);
-  if (payload.am > 0) params.set('am', payload.am.toString());
-  params.set('cu', payload.cu);
+  // Override/Add parameters from the current payload
+  if (payload.pa) params.set('pa', payload.pa);
+  if (payload.pn) params.set('pn', payload.pn);
+  
+  if (payload.am > 0) {
+    // Format to 2 decimal places as per standard UPI spec preference
+    params.set('am', payload.am.toFixed(2));
+  } else {
+    params.delete('am');
+  }
+  
+  params.set('cu', payload.cu || 'INR');
+  
   if (payload.tn) params.set('tn', payload.tn);
   if (payload.mc) params.set('mc', payload.mc);
 

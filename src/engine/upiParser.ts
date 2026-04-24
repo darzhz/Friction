@@ -40,7 +40,8 @@ export function parseUPILink(raw: string): UPIPayload | null {
     
     // Handle generic upi://pay with no params
     if (!pa) {
-      if (raw.toLowerCase().startsWith('upi://pay')) {
+      const lowerRaw = raw.toLowerCase();
+      if (lowerRaw === 'upi://pay' || lowerRaw === 'upi://pay/') {
         return {
           pa: '',
           pn: 'Manual Entry',

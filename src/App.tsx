@@ -100,7 +100,7 @@ function App() {
         return <AddExpense onCancel={() => navigate('/')} onSuccess={() => navigate('/')} />;
       case '/scan':
         return <Scan onScanSuccess={(raw) => {
-          console.log("Raw scan result:", raw);
+          console.log("FULL SCAN CONTENT:", raw);
           const payload = parseUPILink(raw);
           if (payload) {
             setActivePayload(payload);
