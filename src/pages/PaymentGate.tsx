@@ -3,12 +3,13 @@ import { Layout } from '../components/Layout';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { UPIPayload } from '../engine/upiParser';
-import { computeSpendImpact } from '../engine/budgetEngine';
+import { computeSpendImpact, getTransactionsThisWeek } from '../engine/budgetEngine';
 import { useBudgetStore } from '../store/budgetStore';
 import { buildRedirectLink, performRedirect } from '../engine/upiRedirect';
 import { useTransactionStore } from '../store/transactionStore';
 import { AlertCircle, ShieldCheck, Zap, Skull, User, AtSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format } from 'date-fns';
 
 interface PaymentGateProps {
   payload: UPIPayload;
@@ -25,10 +26,9 @@ const PaymentGate: React.FC<PaymentGateProps> = ({ payload, onCancel, onSuccess 
   const [localPa, setLocalPa] = useState(payload.pa);
   const [localPn, setLocalPn] = useState(payload.pn);
 
-  // Derive spent this week from store
-  const spentThisWeek = transactions
-    .filter(t => t.confirmed) // Simplify: in real app use date check
-    .reduce((sum, t) => sum + t.amount, 0);
+  // Derive spent this week from store using engine utility
+  const transactionsThisWeek = getTransactionsThisWeek(transactions);
+  const spentThisWeek = transactionsThisWeek.reduce((sum, t) => sum + t.amount, 0);
 
   const impact = computeSpendImpact(localAmount, spentThisWeek, config.profile.computed.weeklyBudget);
 
@@ -66,6 +66,7 @@ const PaymentGate: React.FC<PaymentGateProps> = ({ payload, onCancel, onSuccess 
       return;
     }
 
+    const now = new Date();
     // Log the transaction as pending
     const transaction = {
       id: crypto.randomUUID(),
@@ -73,9 +74,9 @@ const PaymentGate: React.FC<PaymentGateProps> = ({ payload, onCancel, onSuccess 
       payee: localPn || 'Unknown',
       vpa: localPa,
       category: 'other',
-      timestamp: Date.now(),
-      week: '2024-W16', // Real app: format(new Date(), "yyyy-'W'ww")
-      month: '2024-04',
+      timestamp: now.getTime(),
+      week: format(now, "yyyy-'W'ww"),
+      month: format(now, "yyyy-MM"),
       confirmed: false,
     };
     

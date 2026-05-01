@@ -1,4 +1,5 @@
-import { FinancialProfile } from '../db/schema';
+import { getDaysInMonth, startOfWeek, isSameDay, isWithinInterval, endOfWeek } from 'date-fns';
+import { FinancialProfile, Transaction } from '../db/schema';
 
 export type BudgetStatus = 'safe' | 'warning' | 'over';
 
@@ -27,40 +28,67 @@ export interface SpendImpact {
   frictionDelay: number; // ms, 0 for safe, 3000 for over
 }
 
-export function computeCascade(profile: FinancialProfile): BudgetCascade {
+export function computeCascade(profile: FinancialProfile, date: Date = new Date()): BudgetCascade {
   const fixedTotal = profile.fixedExpenses.reduce((s, e) => s + e.amount, 0);
   const savingsLocked = profile.savingsGoal.lockedIn
     ? profile.savingsGoal.monthlyContribution
     : 0;
   const spendable = profile.monthlyIncome - fixedTotal - savingsLocked;
 
+  const daysInMonth = getDaysInMonth(date);
+
   return {
     income:        profile.monthlyIncome,
     fixedTotal,
     savingsLocked,
     spendable,
-    weeklyBudget:  Math.round(spendable / 4.33),
-    dailyBudget:   Math.round(spendable / 30),
+    weeklyBudget:  Math.round((spendable * 7) / daysInMonth),
+    dailyBudget:   Math.round(spendable / daysInMonth),
   };
 }
 
 export function computeWeeklyState(
   cascade: BudgetCascade,
   spentThisWeek: number,
+  date: Date = new Date()
 ): WeeklyState {
-  const today = new Date().getDay();            // 0 = Sunday
-  // If we consider Monday as start of week, logic might differ. 
-  // Let's assume standard Sunday=0. Days left in week (including today): 
-  // Sun(0): 7, Mon(1): 6, Tue(2): 5, Wed(3): 4, Thu(4): 3, Fri(5): 2, Sat(6): 1
-  const daysLeft = 7 - today;
+  const end = endOfWeek(date, { weekStartsOn: 1 }); // Assuming Monday start
+  const today = date;
+  
+  // Calculate days left in week (including today)
+  const msInDay = 24 * 60 * 60 * 1000;
+  const daysLeft = Math.ceil((end.getTime() - today.getTime() + 1) / msInDay);
 
   return {
     cascade,
     spentThisWeek,
     remaining:      cascade.weeklyBudget - spentThisWeek,
-    daysLeft,
-    suggestedDaily: Math.round((cascade.weeklyBudget - spentThisWeek) / daysLeft),
+    daysLeft:       Math.max(1, daysLeft),
+    suggestedDaily: Math.round((cascade.weeklyBudget - spentThisWeek) / Math.max(1, daysLeft)),
   };
+}
+
+/**
+ * Filters transactions to only include those in the current week.
+ */
+export function getTransactionsThisWeek(transactions: Transaction[], date: Date = new Date()): Transaction[] {
+  const start = startOfWeek(date, { weekStartsOn: 1 });
+  const end = endOfWeek(date, { weekStartsOn: 1 });
+
+  return transactions.filter(t => {
+    const txDate = new Date(t.timestamp);
+    return t.confirmed && isWithinInterval(txDate, { start, end });
+  });
+}
+
+/**
+ * Filters transactions to only include those from today.
+ */
+export function getTransactionsToday(transactions: Transaction[], date: Date = new Date()): Transaction[] {
+  return transactions.filter(t => {
+    const txDate = new Date(t.timestamp);
+    return t.confirmed && isSameDay(txDate, date);
+  });
 }
 
 /**

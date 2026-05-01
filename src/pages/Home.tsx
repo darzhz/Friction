@@ -5,7 +5,7 @@ import { Button } from '../components/Button';
 import { Scan, Plus, ArrowRight } from 'lucide-react';
 import { useBudgetStore } from '../store/budgetStore';
 import { useTransactionStore } from '../store/transactionStore';
-import { computeWeeklyState } from '../engine/budgetEngine';
+import { computeWeeklyState, getTransactionsThisWeek, getTransactionsToday } from '../engine/budgetEngine';
 import { motion, Variants } from 'framer-motion';
 import { BauhausMarquee } from '../components/Marquee';
 
@@ -46,17 +46,12 @@ const Home: React.FC<HomeProps> = ({ onScanRequest, onAddExpense }) => {
   // Derived state
   const cascade = config.profile.computed;
   
-  // Calculate spent this week and today
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  // Calculate spent this week and today using engine utilities
+  const transactionsThisWeek = getTransactionsThisWeek(transactions);
+  const spentThisWeek = transactionsThisWeek.reduce((sum, t) => sum + t.amount, 0);
 
-  const spentThisWeek = transactions
-    .filter(t => t.confirmed) // In a real app, filter by this week's ID
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const spentToday = transactions
-    .filter(t => t.confirmed && t.timestamp >= startOfToday.getTime())
-    .reduce((sum, t) => sum + t.amount, 0);
+  const transactionsToday = getTransactionsToday(transactions);
+  const spentToday = transactionsToday.reduce((sum, t) => sum + t.amount, 0);
 
   const weeklyState = computeWeeklyState(cascade, spentThisWeek);
 

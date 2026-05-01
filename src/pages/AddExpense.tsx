@@ -5,6 +5,7 @@ import { Button } from '../components/Button';
 import { useTransactionStore } from '../store/transactionStore';
 import { Category } from '../db/schema';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
 
 interface AddExpenseProps {
   onCancel: () => void;
@@ -42,8 +43,8 @@ const AddExpense: React.FC<AddExpenseProps> = ({ onCancel, onSuccess }) => {
       vpa: 'manual',
       category,
       timestamp: now.getTime(),
-      week: `${now.getFullYear()}-W${Math.ceil(now.getDate() / 7)}`, // Simplified
-      month: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+      week: format(now, "yyyy-'W'ww"),
+      month: format(now, "yyyy-MM"),
       confirmed: true,
       type: 'manual'
     });
